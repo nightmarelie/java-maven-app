@@ -1,55 +1,38 @@
 #!/usr/bin/env groovy
 
+def gv
+
 pipeline {
-    agent none
+    agent any
     tools {
-      maven 'maven-3.8'
-    }
-    parameters {
-      string(name: 'VERSION', defaultValue: '1.0.0', description: 'version to deploy on prod')
-      choice(name: 'VERSION', choices: ['1.1.0', '1.2.0', '1.3.0'], description: '')
-      booleanParam(name: 'executeTest', defaultValue: true)
-    }
-    environment {
-      NEW_VERSION = '1.3.0'
-      SERVER_CREDENTIALS = credentials('server-credentials')
+        maven 'maven-3.8'
     }
     stages {
-        stage('build') {
+        stage("init") {
             steps {
                 script {
-                    echo "Building the application..."
-                    echo "building version ${NEW_VERSION}"
+                    gv = load "script.groovy"
                 }
             }
         }
-        stage('test') {
-            when {
-              expression {
-                params.executeTests == true
-              }
-            }
+        stage("build jar") {
             steps {
                 script {
-                    echo "Testing the application..."
+                    gv.buildJar()
                 }
             }
         }
-        stage('deploy') {
-            input {
-              message "select the env to deploy to"
-              ok "Done"
-              parameters {
-                choice(name: 'ENV', choices: ['DEV', 'STAGE', 'PROD'], description: '')
-              }
-            }
+        stage("build image") {
             steps {
                 script {
-                    echo "Deploying the application..."
-                    echo "to env ${ENV}"
-                    // withCredentials([usernamePassword(credentials: 'server-credentials', usernameVariable: USER, passwordVariable: PASSWORD)]) {
-                    //   sh -xc 'echo "using server credentials USER: ${USER} and PASSWORD: ${PASSWORD}"'
-                    // }
+                    gv.buildImage()
+                }
+            }
+        }
+        stage("deploy") {
+            steps {
+                script {
+                    gv.deployApp()
                 }
             }
         }
