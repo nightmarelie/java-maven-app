@@ -27,7 +27,7 @@ pipeline {
                 script {
                     echo "Deploying the application..."
                     withCredentials([usernamePassword(credentials: 'server-credentials', usernameVariable: USER, passwordVariable: PASSWORD)]) {
-                      echo "using server credentials USER: ${USER} and PASSWORD: ${PASSWORD}"
+                      sh -xc 'echo "using server credentials USER: ${USER} and PASSWORD: ${PASSWORD}"'
                     }
                 }
             }
