@@ -36,9 +36,17 @@ pipeline {
             }
         }
         stage('deploy') {
+            input {
+              message "select the env to deploy to"
+              ok "Done"
+              parameters {
+                choice(name: 'ENV', choices: ['DEV', 'STAGE', 'PROD'], description: '')
+              }
+            }
             steps {
                 script {
                     echo "Deploying the application..."
+                    echo "to env ${ENV}"
                     // withCredentials([usernamePassword(credentials: 'server-credentials', usernameVariable: USER, passwordVariable: PASSWORD)]) {
                     //   sh -xc 'echo "using server credentials USER: ${USER} and PASSWORD: ${PASSWORD}"'
                     // }
