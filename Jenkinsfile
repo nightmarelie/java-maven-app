@@ -33,7 +33,11 @@ pipeline {
         stage("deploy") {
             steps {
                 script {
-                    gv.deployApp()
+                  def dockerCmd = 'docker run -p 3000:3080 -d akrivcov/my-repo:1.4'
+                  sshagent(['ec2-server-key']) {
+                      sh "ssh -o StrictHostKeyChecking=no ec2-user@3.96.130.201 ${dockerCmd}"
+                  }
+                    // gv.deployApp()
                 }
             }
         }
